@@ -1,0 +1,43 @@
+Source: lxqt-notificationd
+Maintainer: LXQt Packaging Team <pkg-lxqt-devel@lists.alioth.debian.org>
+Uploaders: Alf Gaida <agaida@siduction.org>,
+           ChangZhuo Chen (陳昌倬) <czchen@debian.org>,
+           Andrew Lee (李健秋) <ajqlee@debian.org>
+Section: x11
+Priority: optional
+Build-Depends: debhelper-compat (= 12),
+               libkf5windowsystem-dev,
+               liblxqt0-dev (>= 0.16.0~),
+               libqt5svg5-dev,
+               libqt5x11extras5-dev,
+               libx11-dev,
+               qtbase5-private-dev
+Standards-Version: 4.4.0
+Vcs-Browser: https://salsa.debian.org/lxqt-team/lxqt-notificationd
+Vcs-Git: https://salsa.debian.org/lxqt-team/lxqt-notificationd.git
+Homepage: https://github.com/lxqt/lxqt-notificationd
+
+Package: lxqt-notificationd
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: lxqt-notificationd-l10n,
+            lxqt-qtplugin
+Breaks: lxqt-common (<< 0.12.0)
+Replaces: lxqt-common (<< 0.12.0)
+Provides: notification-daemon
+Description: LXQt notification daemon
+ The LXQt notification daemon.
+ .
+ This package contain the LXQt notification daemon.
+
+Package: lxqt-notificationd-l10n
+Architecture: all
+Multi-Arch: foreign
+Section: localization
+Depends: ${misc:Depends},
+         qttranslations5-l10n
+Breaks: lxqt-notificationd (<< 0.11.0)
+Replaces: lxqt-notificationd (<< 0.11.0)
+Description: Language package for lxqt-notificationd
+ This package contains the l10n files needed by the lxqt-notificationd.
