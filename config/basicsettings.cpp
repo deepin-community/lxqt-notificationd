@@ -41,14 +41,18 @@ BasicSettings::BasicSettings(LXQt::Settings* settings, QWidget *parent) :
 
     restoreSettings();
 
-    connect(topLeftRB,      SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(topCenterRB,    SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(topRightRB,     SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(centerLeftRB,   SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(centerRightRB,  SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(bottomLeftRB,   SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(bottomCenterRB, SIGNAL(clicked()), this, SLOT(updateNotification()));
-    connect(bottomRightRB,  SIGNAL(clicked()), this, SLOT(updateNotification()));
+    connect(spacingBox, &QAbstractSpinBox::editingFinished, this, &BasicSettings::save);
+    connect(widthBox, &QAbstractSpinBox::editingFinished, this, &BasicSettings::save);
+    connect(topLeftRB,      &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(topCenterRB,    &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(topRightRB,     &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(centerLeftRB,   &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(centerRightRB,  &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(bottomLeftRB,   &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(bottomCenterRB, &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+    connect(bottomRightRB,  &QRadioButton::clicked, this, &BasicSettings::updateNotification);
+
+    connect(previewButton, &QAbstractButton::clicked, this, &BasicSettings::previewNotification);
 
     LXQt::Notification *serverTest = new LXQt::Notification(QString(), this);
     serverTest->queryServerInfo();
@@ -57,12 +61,12 @@ BasicSettings::BasicSettings(LXQt::Settings* settings, QWidget *parent) :
     QTimer *saneQueryTimeout = new QTimer(this);
     saneQueryTimeout->setSingleShot(true);
     saneQueryTimeout->start(200);
-    connect(saneQueryTimeout, &QTimer::timeout, [this]() {
+    connect(saneQueryTimeout, &QTimer::timeout, warningLabel, [this]() {
                 warningLabel->setText(tr("<b>Warning:</b> notifications daemon is slow to respond.\n"
                         "Keep trying to connect…"));
             });
 
-    connect(serverTest, &LXQt::Notification::serverInfoReady, [this, serverTest, saneQueryTimeout]() {
+    connect(serverTest, &LXQt::Notification::serverInfoReady, this, [this, serverTest, saneQueryTimeout]() {
             QString serverName = serverTest->serverInfo().name;
             if (serverName != QL1S("lxqt-notificationd"))
             {
@@ -80,12 +84,13 @@ BasicSettings::BasicSettings(LXQt::Settings* settings, QWidget *parent) :
         });
 }
 
-BasicSettings::~BasicSettings()
-{
-}
+BasicSettings::~BasicSettings() = default;
 
 void BasicSettings::restoreSettings()
 {
+    spacingBox->setValue(mSettings->value(QL1S("spacing"), 6).toInt());
+    widthBox->setValue(mSettings->value(QL1S("width"), 300).toInt());
+
     QString placement = mSettings->value(QL1S("placement"),
                                          QL1S("bottom-right")).toString().toLower();
 
@@ -128,7 +133,36 @@ void BasicSettings::updateNotification()
         align = QL1S("bottom-right");
 
     mSettings->setValue(QL1S("placement"), align);
-    LXQt::Notification::notify(tr("Notification demo ") + align,
+}
+
+void BasicSettings::previewNotification()
+{
+   QString str;
+    if (topLeftRB->isChecked())
+        str = tr("at top left");
+    else if (topCenterRB->isChecked())
+        str = tr("at top center");
+    else if (topRightRB->isChecked())
+        str = tr("at top right");
+    else if (centerLeftRB->isChecked())
+        str = tr("at center left");
+    else if (centerRightRB->isChecked())
+        str = tr("at center right");
+    else if (bottomLeftRB->isChecked())
+        str = tr("at bottom left");
+    else if (bottomCenterRB->isChecked())
+        str = tr("at bottom center");
+    else // if (bottomRightRB->isChecked())
+        str = tr("at bottom right");
+
+    LXQt::Notification::notify(tr("Notification demo ") + str,
                                tr("This is a test notification.\n All notifications will now appear here on LXQt."),
                                QStringLiteral("lxqt"));
 }
+
+void BasicSettings::save()
+{
+    mSettings->setValue(QL1S("spacing"), spacingBox->value());
+    mSettings->setValue(QL1S("width"), widthBox->value());
+}
+

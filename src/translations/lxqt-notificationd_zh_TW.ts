@@ -4,12 +4,12 @@
 <context>
     <name>NotificationActionsComboWidget</name>
     <message>
-        <location filename="../notificationwidgets.cpp" line="103"/>
+        <location filename="../notificationwidgets.cpp" line="131"/>
         <source>Actions:</source>
         <translation>動作：</translation>
     </message>
     <message>
-        <location filename="../notificationwidgets.cpp" line="122"/>
+        <location filename="../notificationwidgets.cpp" line="155"/>
         <source>OK</source>
         <translation>確定</translation>
     </message>
@@ -17,22 +17,27 @@
 <context>
     <name>Notifyd</name>
     <message>
-        <location filename="../notifyd.cpp" line="227"/>
+        <location filename="../notifyd.cpp" line="274"/>
         <source>Clear All</source>
         <translation>全部清除</translation>
     </message>
     <message>
-        <location filename="../notifyd.cpp" line="235"/>
+        <location filename="../notifyd.cpp" line="285"/>
+        <source>Do Not Disturb</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../notifyd.cpp" line="293"/>
         <source>Options</source>
         <translation>選項</translation>
     </message>
     <message numerus="yes">
-        <location filename="../notifyd.cpp" line="242"/>
         <location filename="../notifyd.cpp" line="300"/>
-        <location filename="../notifyd.cpp" line="320"/>
+        <location filename="../notifyd.cpp" line="358"/>
+        <location filename="../notifyd.cpp" line="379"/>
         <source>%n Unattended Notification(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n 個未檢視的通知</numerusform>
         </translation>
     </message>
 </context>

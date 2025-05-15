@@ -141,6 +141,8 @@ private:
     QPointer<QMenu> m_trayMenu;
     int m_trayChecker;
 
+    bool m_doNotDisturb;
+
     void createTrayIcon();
 
 private slots:
@@ -148,6 +150,7 @@ private slots:
     void checkTray();
     void addToUnattendedList(uint id, uint reason, const QString &date);
     void restoreUnattended();
+    void updateIcon();
 };
 
 #endif // NOTIFYD_H

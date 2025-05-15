@@ -4,12 +4,12 @@
 <context>
     <name>NotificationActionsComboWidget</name>
     <message>
-        <location filename="../notificationwidgets.cpp" line="103"/>
+        <location filename="../notificationwidgets.cpp" line="131"/>
         <source>Actions:</source>
         <translation>Ações:</translation>
     </message>
     <message>
-        <location filename="../notificationwidgets.cpp" line="122"/>
+        <location filename="../notificationwidgets.cpp" line="155"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
@@ -17,19 +17,24 @@
 <context>
     <name>Notifyd</name>
     <message>
-        <location filename="../notifyd.cpp" line="227"/>
+        <location filename="../notifyd.cpp" line="274"/>
         <source>Clear All</source>
         <translation>Limpar tudo</translation>
     </message>
     <message>
-        <location filename="../notifyd.cpp" line="235"/>
+        <location filename="../notifyd.cpp" line="285"/>
+        <source>Do Not Disturb</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../notifyd.cpp" line="293"/>
         <source>Options</source>
         <translation>Opções</translation>
     </message>
     <message numerus="yes">
-        <location filename="../notifyd.cpp" line="242"/>
         <location filename="../notifyd.cpp" line="300"/>
-        <location filename="../notifyd.cpp" line="320"/>
+        <location filename="../notifyd.cpp" line="358"/>
+        <location filename="../notifyd.cpp" line="379"/>
         <source>%n Unattended Notification(s)</source>
         <translation>
             <numerusform>%n Notificação Autônoma</numerusform>

@@ -3,7 +3,7 @@
 ## Overview
 
 `lxqt-notificationd` is LXQt's implementation of a daemon according to the
-[Desktop Notifications Specification](https://developer.gnome.org/notification-spec/).
+[Desktop Notifications Specification](https://specifications.freedesktop.org/notification-spec/latest/).
 
 This specification defines a way to display notifications in pop-up windows on
 desktops. Notifications like this are e. g. frequently used by chat or mail
@@ -24,10 +24,8 @@ lxqt-notificationd is implementing version 1.2 of the said specification.
 
 ### Compiling source code
 
-Runtime dependencies are KWindowSystem, [liblxqt](https://github.com/lxqt/liblxqt)
-and [lxqt-session](https://github.com/lxqt/lxqt-session).
-Additional build dependencies are CMake and optionally Git to pull latest VCS
-checkouts. 
+Runtime dependencies are KWindowSystem, [liblxqt](https://github.com/lxqt/liblxqt), [lxqt-session](https://github.com/lxqt/lxqt-session) and [layer-shell-qt](https://invent.kde.org/plasma/layer-shell-qt/). Additional build dependencies are CMake and optionally Git to pull latest VCS
+checkouts.
 
 Code configuration is handled by CMake. CMake variable `CMAKE_INSTALL_PREFIX` has
 to be set to `/usr` on most operating systems.
