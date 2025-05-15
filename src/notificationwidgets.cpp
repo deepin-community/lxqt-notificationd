@@ -37,6 +37,19 @@
 
 #include <QtDebug>
 
+void PushButtonTextStyle::drawItemText(QPainter* painter, const QRect& rect, int flags,
+                                       const QPalette& pal, bool enabled, const QString& text,
+                                       QPalette::ColorRole textRole) const
+{
+    QString txt;
+    // get the button text because the text that's given to this function may be middle-elided
+    if (const QPushButton *pb = dynamic_cast<const QPushButton*>(painter->device()))
+        txt = pb->text();
+    else
+        txt = text;
+    txt = QFontMetrics(painter->font()).elidedText(txt, Qt::ElideRight, rect.width());
+    QProxyStyle::drawItemText(painter, rect, (flags & ~Qt::AlignHCenter) | Qt::AlignLeft, pal, enabled, txt, textRole);
+}
 
 NotificationActionsWidget::NotificationActionsWidget(const QStringList& actions, QWidget *parent)
     : QWidget(parent)
@@ -67,22 +80,32 @@ NotificationActionsWidget::NotificationActionsWidget(const QStringList& actions,
 
 
 NotificationActionsButtonsWidget::NotificationActionsButtonsWidget(const QStringList& actions, QWidget *parent)
-    : NotificationActionsWidget(actions, parent)
+    : NotificationActionsWidget(actions, parent),
+      mStyle(new PushButtonTextStyle())
 {
+    setStyle(mStyle);
     QHBoxLayout *l = new QHBoxLayout();
     setLayout(l);
 
     QButtonGroup *group = new QButtonGroup(this);
 
-    for (const auto &action : qAsConst(m_actions))
+    for (const auto &action : std::as_const(m_actions))
     {
-        QPushButton *b = new QPushButton(action.second, this);
-        b->setObjectName(action.first);
+        auto &id    = action.first;
+        auto &label = action.second;
+
+        if (id == m_defaultAction && label.isEmpty())
+        {
+            continue;
+        }
+
+        QPushButton *b = new QPushButton(label, this);
+        b->setObjectName(id);
+        // Notifications do not have focus, and if they get focus under Wayland,
+        // we do not want to have a focus widget.
+        b->setFocusPolicy(Qt::NoFocus);
         l->addWidget(b);
         group->addButton(b);
-
-        if (action.first == m_defaultAction)
-            b->setFocus(Qt::OtherFocusReason);
     }
     connect(group, static_cast<void (QButtonGroup::*)(QAbstractButton*)>(&QButtonGroup::buttonClicked),
             this, &NotificationActionsButtonsWidget::actionButtonActivated);
@@ -91,6 +114,11 @@ NotificationActionsButtonsWidget::NotificationActionsButtonsWidget(const QString
 void NotificationActionsButtonsWidget::actionButtonActivated(QAbstractButton* button)
 {
     emit actionTriggered(button->objectName());
+}
+
+NotificationActionsButtonsWidget::~NotificationActionsButtonsWidget()
+{
+    delete mStyle;
 }
 
 
@@ -102,17 +130,22 @@ NotificationActionsComboWidget::NotificationActionsComboWidget(const QStringList
 
     l->addWidget(new QLabel(tr("Actions:"), this));
     m_comboBox = new QComboBox(this);
+    m_comboBox->setFocusPolicy(Qt::NoFocus);
     int currentIndex = -1;
 
-    for (int i = 0; i < m_actions.count(); ++i)
+    for (const auto &action : std::as_const(m_actions))
     {
-        auto const & action = m_actions[i];
+        auto &id    = action.first;
+        auto &label = action.second;
 
-        m_comboBox->addItem(action.second, action.first);
-        if (action.first == m_defaultAction)
+        if (id == m_defaultAction)
         {
-            currentIndex = i;
+            if (label.isEmpty())
+                continue;
+            currentIndex = m_comboBox->count();
         }
+
+        m_comboBox->addItem(label, id);
     }
     l->addWidget(m_comboBox);
 
@@ -120,6 +153,7 @@ NotificationActionsComboWidget::NotificationActionsComboWidget(const QStringList
         m_comboBox->setCurrentIndex(currentIndex);
 
     QPushButton *b = new QPushButton(tr("OK"), this);
+    b->setFocusPolicy(Qt::NoFocus);
     l->addWidget(b);
     connect(b, &QPushButton::clicked,
             this, &NotificationActionsComboWidget::actionComboBoxActivated);

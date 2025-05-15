@@ -32,7 +32,9 @@
 #include <QtDBus/QDBusArgument>
 #include <QDebug>
 #include <XdgIcon>
-#include <KWindowSystem/KWindowSystem>
+#include <KWindowSystem>
+#include <KF6/KWindowSystem/KX11Extras>
+#include <KF6/KWindowSystem/KWindowInfo>
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QStyle>
@@ -50,9 +52,9 @@ Notification::Notification(const QString &application,
                            const QStringList& actions, const QVariantMap& hints,
                            QWidget *parent)
     : QWidget(parent),
-      m_timer(0),
+      m_timer(nullptr),
       m_linkHovered(false),
-      m_actionWidget(0),
+      m_actionWidget(nullptr),
       m_icon(icon),
       m_timeout(timeout),
       m_actions(actions),
@@ -103,7 +105,7 @@ void Notification::setValues(const QString &application,
     }
     else if (!hints[QL1S("image-path")].isNull())
     {
-        m_pixmap = getPixmapFromHint(hints[QL1S("image-path")]);
+        m_pixmap = getPixmapFromString(hints[QL1S("image-path")].toString());
     }
     else if (!hints[QL1S("image_path")].isNull())
     {
@@ -189,7 +191,7 @@ void Notification::setValues(const QString &application,
     }
 
     // Actions
-    if (actions.count() && m_actionWidget == 0)
+    if (actions.count() && m_actionWidget == nullptr)
     {
         if (actions.count()/2 < 4)
             m_actionWidget = new NotificationActionsButtonsWidget(actions, this);
@@ -233,8 +235,22 @@ void Notification::closeButton_clicked()
 void Notification::paintEvent(QPaintEvent *)
 {
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
     QPainter p(this);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6,8,0))
+    // NOTE: Starting from Qt 6.8.0, random artifacts are possible in
+    // translucent windows under Wayland. This a workaround.
+    if (QGuiApplication::platformName() == QStringLiteral("wayland")
+        && testAttribute(Qt::WA_StyleSheetTarget))
+    {
+        auto origMode = p.compositionMode();
+        p.setCompositionMode(QPainter::CompositionMode_Clear);
+        p.fillRect(rect(), Qt::transparent);
+        p.setCompositionMode(origMode);
+    }
+#endif
+
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
@@ -283,19 +299,19 @@ QPixmap Notification::getPixmapFromString(const QString &str) const
     }
 }
 
-void Notification::enterEvent(QEvent * event)
+void Notification::enterEvent(QEvent * /*event*/)
 {
     if (m_timer)
         m_timer->pause();
 }
 
-void Notification::leaveEvent(QEvent * event)
+void Notification::leaveEvent(QEvent * /*event*/)
 {
     if (m_timer)
         m_timer->resume();
 }
 
-bool Notification::eventFilter(QObject *obj, QEvent *event)
+bool Notification::eventFilter(QObject * /*obj*/, QEvent * event)
 {
     // Catch mouseReleaseEvent on child labels if a link is not currently being hovered.
     //
@@ -309,7 +325,7 @@ bool Notification::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
-void Notification::linkHovered(QString link)
+void Notification::linkHovered(const QString& link)
 {
     m_linkHovered = !link.isEmpty();
 }
@@ -326,7 +342,7 @@ void Notification::mouseReleaseEvent(QMouseEvent * event)
         return;
     }
 
-    const auto ids = KWindowSystem::stackingOrder();
+    const auto ids = KX11Extras::stackingOrder();
     for (const WId &i : ids)
     {
         KWindowInfo info = KWindowInfo(i, NET::WMName | NET::WMVisibleName);
@@ -340,7 +356,8 @@ void Notification::mouseReleaseEvent(QMouseEvent * event)
         }
         if (appName == appLabel->text() || windowTitle == appLabel->text())
         {
-            KWindowSystem::raiseWindow(i);
+            if (auto w = QWidget::find(i))
+                 w->raise();
             closeButton_clicked();
             return;
         }
